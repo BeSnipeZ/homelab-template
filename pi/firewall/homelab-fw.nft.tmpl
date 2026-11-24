@@ -1,0 +1,12 @@
+# Own nftables table: LOCKED_PORTS answer only on loopback and Tailscale.
+# No "flush ruleset", so Docker's and Tailscale's tables stay untouched.
+# Undo: sudo systemctl disable --now homelab-fw && sudo nft delete table inet homelab
+table inet homelab
+delete table inet homelab
+table inet homelab {
+  chain input {
+    type filter hook input priority -10; policy accept;
+    iifname { "lo", "tailscale0" } accept
+    tcp dport { ${LOCKED_PORTS} } drop
+  }
+}

@@ -1,0 +1,19 @@
+[Unit]
+Description=Homelab dashboard (Node)
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=${HL_USER}
+WorkingDirectory=${HL_DIR}/pi/dashboard
+EnvironmentFile=${HL_DIR}/.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=10
+# Hardening: the dashboard only needs its own folder.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=${HL_DIR}/pi/dashboard
+ProtectHome=read-only
+[Install]
+WantedBy=multi-user.target

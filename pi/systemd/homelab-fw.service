@@ -1,0 +1,9 @@
+[Unit]
+Description=Homelab firewall (LOCKED_PORTS only via lo + tailscale0)
+After=network-pre.target docker.service
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/nft -f /etc/homelab-fw.nft
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

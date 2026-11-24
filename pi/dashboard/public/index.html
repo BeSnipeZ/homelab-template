@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16141a">
+  <title>Homelab</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Homelab</h1>
+    <span id="net" class="pill" role="status">online</span>
+  </header>
+  <main>
+    <section class="card" aria-labelledby="h-status">
+      <h2 id="h-status">Pi</h2>
+      <dl id="pi" class="facts"></dl>
+      <ul id="services" class="services"></ul>
+    </section>
+    <section class="card" aria-labelledby="h-pc">
+      <h2 id="h-pc">PCs</h2>
+      <ul id="pcs" class="services"></ul>
+    </section>
+    <section class="card wide" aria-labelledby="h-todo">
+      <h2 id="h-todo">To-do</h2>
+      <form id="add">
+        <label class="sr" for="text">New to-do</label>
+        <input id="text" name="text" maxlength="500" placeholder="New to-do" required>
+        <label class="sr" for="due">Due</label>
+        <input id="due" name="due" type="date">
+        <button type="submit">Add</button>
+      </form>
+      <ul id="todos" class="todos"></ul>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

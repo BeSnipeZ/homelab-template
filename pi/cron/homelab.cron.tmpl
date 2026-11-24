@@ -1,0 +1,5 @@
+# /etc/cron.d/homelab — written by setup.sh, edit the template in the repo instead.
+SHELL=/bin/bash
+*/5 * * * * ${HL_USER} ${HL_DIR}/pi/health/services-push.sh >> ${HL_DIR}/pi/health.log 2>&1
+7 * * * *   root       ${HL_DIR}/pi/health/disk-health.sh >> /var/log/homelab-disk.log 2>&1
+20 4 * * *  ${HL_USER} ${HL_DIR}/pi/backup/backup.sh >> ${HL_DIR}/pi/backup.log 2>&1

@@ -1,0 +1,8 @@
+{
+  "name": "homelab-dashboard",
+  "private": true,
+  "description": "Small self-hosted dashboard: Pi status, PC heartbeat, to-dos. No dependencies.",
+  "engines": { "node": ">=22.13" },
+  "scripts": { "start": "node server.js", "test": "node test.js" },
+  "license": "MIT"
+}

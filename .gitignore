@@ -1,0 +1,10 @@
+# Your configuration and secrets
+.env
+*.env
+!.env.example
+
+# Runtime data
+pi/dashboard/data.db*
+*.log
+node_modules/
+__pycache__/
