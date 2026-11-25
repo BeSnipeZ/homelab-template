@@ -90,7 +90,11 @@ Not included on purpose: anything hardware-specific (RGB keyboards, smart lights
 
 - The dashboard has **no login of its own**. It binds to `127.0.0.1`; `tailscale serve` publishes it to your tailnet only, so Tailscale is the authentication. Do not bind it to `0.0.0.0` on a shared network.
 - Browser writes must be same-origin (CSRF guard); the PC heartbeat uses a bearer token compared in constant time. Bodies are capped at 64 KB, inputs validated, strict CSP and `nosniff` headers set.
-- The systemd unit runs as your user with `ProtectSystem=strict`, `NoNewPrivileges` and write access only to the dashboard folder.
+- The systemd unit runs as your user with `ProtectSystem=strict`, `NoNewPrivileges`, kernel/cgroup protection, `UMask=0077` and write access only to the dashboard folder.
+- No login page means no password to guess, but every device in your tailnet can use the dashboard. Do not share the Pi node with other tailnets, and use [Tailscale ACLs](https://tailscale.com/kb/1018/acls) if other people have devices in yours.
+- Requests whose `Host` is not an IP, `localhost`, `*.ts.net` or `TS_HOST` get `421` (DNS-rebinding guard).
+- Root's hourly SMART job runs a root-owned copy (`/usr/local/sbin/homelab-disk-health`) and only reads plain, validated values from `.env`; root never sources a file your user can edit. Re-run `setup.sh` after changing `disk-health.sh`.
+- The Telegram bot token goes to curl via stdin, not the command line, so other users cannot read it from `ps`. Backups and the dashboard database are created owner-only (`umask 077`).
 - `.env` is `chmod 600` on the Pi and restricted to your user on Windows. Kuma's data folder is `chmod 700` (its database holds notification tokens).
 - The `homelab` nftables table drops `LOCKED_PORTS` on every interface except `lo` and `tailscale0` — defence in depth if something binds to all interfaces. Undo: `sudo systemctl disable --now homelab-fw && sudo nft delete table inet homelab`.
 - `setup.sh` installs Node, Docker and Tailscale from their official install scripts (`deb.nodesource.com`, `get.docker.com`, `tailscale.com/install.sh`). Read them first if you prefer.
@@ -101,7 +105,7 @@ Not included on purpose: anything hardware-specific (RGB keyboards, smart lights
 cd pi/dashboard && node test.js
 ```
 
-Covers validation, to-do lifecycle, path traversal, CSRF guard, token check, body limit and unit-name filtering.
+Covers validation, to-do lifecycle, path traversal, CSRF guard, DNS-rebinding guard, token check, body limit and unit-name filtering.
 
 ## License
 

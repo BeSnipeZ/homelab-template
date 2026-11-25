@@ -3,6 +3,7 @@
 # weekday = 7 days rolling. The PC pulls BACKUP_DIR with pc/backup-pull.ps1 so a dead SD card
 # or SSD does not take the only copy with it.
 . "$(dirname "$0")/../lib.sh"
+umask 077  # copies hold the same data as the live databases
 day=$(date +%u)
 fail=""
 mkdir -p "$BACKUP_DIR"

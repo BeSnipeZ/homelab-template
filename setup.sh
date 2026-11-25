@@ -80,6 +80,8 @@ sudo systemctl restart homelab-fw
 # --- 7. cron -------------------------------------------------------------------------
 say "Cron jobs (/etc/cron.d/homelab)"
 chmod +x pi/*/*.sh
+# root's hourly job: a root-owned copy, so editing the repo as your user never runs code as root
+sudo install -o root -g root -m 755 pi/health/disk-health.sh /usr/local/sbin/homelab-disk-health
 render pi/cron/homelab.cron.tmpl | sudo tee /etc/cron.d/homelab >/dev/null
 sudo chmod 644 /etc/cron.d/homelab
 

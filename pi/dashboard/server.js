@@ -57,6 +57,16 @@ function readJson(req) {
   })
 }
 
+// DNS rebinding guard: a hostile site can point its own name at this server, then Origin and
+// Host match. Real visitors arrive as an IP literal, localhost, *.ts.net or TS_HOST.
+const TS_HOST = (process.env.TS_HOST || '').toLowerCase()
+function hostOk(req) {
+  let name
+  try { name = new URL(`http://${req.headers.host}`).hostname.toLowerCase() } catch { return false }
+  return name === 'localhost' || name === TS_HOST || name.endsWith('.ts.net') ||
+    /^\d{1,3}(\.\d{1,3}){3}$/.test(name) || name.startsWith('[') // IPv4 / IPv6 literal
+}
+
 // Browser writes: the Origin header must match the Host (blocks cross-site form posts).
 function sameOrigin(req) {
   const origin = req.headers.origin
@@ -64,8 +74,7 @@ function sameOrigin(req) {
     const site = req.headers['sec-fetch-site']
     return !site || site === 'same-origin' || site === 'none' // curl & co. send neither header
   }
-  const host = req.headers['x-forwarded-host'] || req.headers.host
-  try { return new URL(origin).host === host } catch { return false }
+  try { return new URL(origin).host === req.headers.host } catch { return false }
 }
 
 function tokenOk(req) {
@@ -143,7 +152,8 @@ async function api(req, res, url) {
 }
 
 async function staticFile(res, pathname) {
-  const rel = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '')
+  let rel
+  try { rel = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '') } catch { return send(res, 404, { error: 'not found' }) }
   const file = path.resolve(PUBLIC, rel)
   if (!file.startsWith(PUBLIC + path.sep)) return send(res, 404, { error: 'not found' })
   try {
@@ -155,6 +165,7 @@ async function staticFile(res, pathname) {
 
 const server = createServer(async (req, res) => {
   try {
+    if (!hostOk(req)) throw new HttpError(421, 'unknown host')
     const url = new URL(req.url, 'http://x')
     if (url.pathname.startsWith('/api/')) await api(req, res, url)
     else if (req.method === 'GET' || req.method === 'HEAD') await staticFile(res, url.pathname)

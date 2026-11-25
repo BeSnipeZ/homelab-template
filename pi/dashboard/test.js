@@ -54,6 +54,17 @@ test('PC heartbeat needs the token', async () => {
   assert.deepEqual(s.services, [])
 })
 
+test('DNS rebinding: unknown host names are refused', async () => {
+  const { request } = require('node:http')
+  const get = (host) => new Promise((r) => request(base + '/api/todos', { headers: { host } }, (res) => { res.resume(); r(res.statusCode) }).end())
+  assert.equal(await get('evil.example'), 421)
+  assert.equal(await get('evil.example:3000'), 421)
+  assert.equal(await get('homelab.tail123.ts.net'), 200)
+  assert.equal(await get('localhost:3000'), 200)
+  assert.equal(await get('192.168.1.5:3000'), 200)
+  assert.equal((await call('/%E0%A4%A')).status, 404) // malformed escape: 404, not 500
+})
+
 test('oversized bodies are rejected', async () => {
   const r = await call('/api/todos', { method: 'POST', body: JSON.stringify({ text: 'a'.repeat(70000) }) }).catch(() => ({ status: 413 }))
   assert.equal(r.status, 413)
